@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102c60">
+  <title>Acumetis | Survey Countdown</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 100%; }
+    body { font-family: Arial, Helvetica, sans-serif; color: #fff; }
+    .banner {
+      position: relative; isolation: isolate; overflow: hidden;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      min-height: 176px; padding: 19px 20px 23px;
+      background: linear-gradient(110deg, #14265c, #086d9d);
+      background-image: linear-gradient(90deg, rgba(12,29,74,.70), rgba(12,45,82,.40)), url("gradient.svg");
+      background-size: cover; background-position: center;
+      text-align: center;
+    }
+    .banner::after { content: ""; position: absolute; inset: 0; z-index: -1;
+      background: radial-gradient(ellipse at 80% 5%, rgba(49,214,222,.14), transparent 58%); }
+    .waves { position: absolute; left: -2%; width: 104%; height: 190px; bottom: -72px;
+      background: url('waves.svg') center center / 100% 100% no-repeat;
+      opacity: .65; pointer-events: none; z-index: 0; }
+    h1 { position: relative; z-index: 1; text-shadow: 0 1px 8px rgba(0,0,0,.3); margin: 0 0 13px; font-size: clamp(18px, 2.4vw, 27px); font-weight: 650; letter-spacing: .01em; }
+    .countdown { position: relative; z-index: 1; display: flex; justify-content: center; gap: clamp(14px, 3vw, 40px); align-items: start; }
+    .unit { min-width: 45px; }
+    .number { display: block; font-size: clamp(27px, 3.7vw, 42px); font-weight: 700;
+      font-variant-numeric: tabular-nums; line-height: 1.05; }
+    .label { display: block; font-size: 10px; letter-spacing: .13em; text-transform: uppercase;
+      color: #c5e7ef; margin-top: 5px; }
+    .status { margin: 0; font-size: 16px; font-weight: 600; }
+    @media (max-width: 420px) {
+      .banner { min-height: 166px; padding-inline: 10px; }
+      .countdown { gap: 13px; }
+      .waves { opacity: .3; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main class="banner" aria-label="Acumetis employee engagement survey countdown">
+    <div class="waves" aria-hidden="true"></div>
+    <h1>Your Voice. Our Acumetis.</h1>
+    <div class="countdown" id="countdown" role="timer" aria-label="Time until the survey launches">
+      <div class="unit"><span class="number" id="days">--</span><span class="label">Days</span></div>
+      <div class="unit"><span class="number" id="hours">--</span><span class="label">Hours</span></div>
+      <div class="unit"><span class="number" id="minutes">--</span><span class="label">Minutes</span></div>
+      <div class="unit"><span class="number" id="seconds">--</span><span class="label">Seconds</span></div>
+    </div>
+    <p class="status" id="status" hidden></p>
+  </main>
+  <script>
+    // UPDATE THIS once Rebecca confirms the launch. Use an ISO 8601 date/time
+    // with an explicit offset, e.g. "2026-11-20T09:00:00-05:00" for 9 AM EST.
+    // Leave as null until confirmed; the timer will display dashes.
+    const LAUNCH_DATE = "2026-11-20T09:00:00-05:00";
+
+    const countdown = document.getElementById('countdown');
+    const status = document.getElementById('status');
+    const parts = Object.fromEntries(['days','hours','minutes','seconds'].map(k => [k, document.getElementById(k)]));
+    function tick() {
+      if (!LAUNCH_DATE) return;
+      const target = Date.parse(LAUNCH_DATE);
+      if (!Number.isFinite(target)) { countdown.hidden = true; status.hidden = false; status.textContent = 'Launch date needs updating'; return; }
+      const left = Math.max(0, target - Date.now());
+      if (left === 0) { countdown.hidden = true; status.hidden = false; status.textContent = 'The survey is now live!'; return; }
+      const s = Math.floor(left / 1000);
+      const values = {days: Math.floor(s/86400), hours: Math.floor(s/3600)%24, minutes: Math.floor(s/60)%60, seconds: s%60};
+      for (const [key, value] of Object.entries(values)) parts[key].textContent = String(value).padStart(2, '0');
+    }
+    tick(); setInterval(tick, 1000);
+  </script>
+</body>
+</html>
